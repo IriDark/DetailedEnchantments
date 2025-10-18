@@ -1,16 +1,13 @@
-package com.idark.valoria.core.datagen;
+package github.iri.anotherday.core.data;
 
-import com.idark.valoria.registries.BlockRegistry;
-import com.idark.valoria.registries.ItemsRegistry;
-import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.LootTable;
+import github.iri.anotherday.registries.*;
+import net.minecraft.data.loot.*;
+import net.minecraft.world.flag.*;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.storage.loot.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.*;
 
 public class LootTableSubprovider extends BlockLootSubProvider{
     public final List<Block> blocks = new ArrayList<>();
@@ -36,25 +33,7 @@ public class LootTableSubprovider extends BlockLootSubProvider{
 
     @Override
     protected void generate(){
-        this.add(BlockRegistry.eldritchDoor.get(), block -> createDoorTable(BlockRegistry.eldritchDoor.get()));
-        this.add(BlockRegistry.eldritchPlanksSlab.get(), block -> createSlabItemTable(BlockRegistry.eldritchPlanksSlab.get()));
-        this.add(BlockRegistry.eldritchLeaves.get(), block -> createLeavesDrops(block, BlockRegistry.eldritchSapling.get(), NORMAL_LEAVES_SAPLING_CHANCES));
-        this.add(BlockRegistry.eldritchSign.get(), block -> createSingleItemTable(block));
-        this.add(BlockRegistry.eldritchWallSign.get(), block -> createSingleItemTable(block));
-        this.add(BlockRegistry.eldritchHangingSign.get(), block -> createSingleItemTable(block));
-        this.add(BlockRegistry.eldritchWallHangingSign.get(), block -> createSingleItemTable(block));
-        this.add(BlockRegistry.pyratiteOre.get(), block -> createOreDrop(block, ItemsRegistry.pyratite.get()));
-
-        this.dropSelf(BlockRegistry.bronzeGlassPane.get());
-        this.dropSelf(BlockRegistry.eldritchLog.get());
-        this.dropSelf(BlockRegistry.strippedEldritchLog.get());
-        this.dropSelf(BlockRegistry.eldritchPlanks.get());
-        this.dropSelf(BlockRegistry.eldritchPlanksStairs.get());
-        this.dropSelf(BlockRegistry.eldritchTrapdoor.get());
-        this.dropSelf(BlockRegistry.eldritchFence.get());
-        this.dropSelf(BlockRegistry.eldritchFenceGate.get());
-        this.dropSelf(BlockRegistry.eldritchButton.get());
-        this.dropSelf(BlockRegistry.eldritchPressurePlate.get());
-        this.dropSelf(BlockRegistry.eldritchSapling.get());
+        this.dropSelf(BlockRegistry.oakHollow.get());
+        this.dropSelf(BlockRegistry.spruceHollow.get());
     }
 }

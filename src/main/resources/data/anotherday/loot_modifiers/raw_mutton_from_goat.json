@@ -1,0 +1,10 @@
+{
+  "type": "tridot:add_loot",
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:entities/goat"
+    }
+  ],
+  "loot_table": "anotherday:entity/goat"
+}

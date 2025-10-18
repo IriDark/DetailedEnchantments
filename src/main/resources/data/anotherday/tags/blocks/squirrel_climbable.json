@@ -1,6 +1,7 @@
 {
   "values": [
-    "anotherday:oak_hollow",
-    "anotherday:spruce_hollow"
+    "#anotherday:squirrel_homes",
+    "#minecraft:logs",
+    "#minecraft:leaves"
   ]
 }

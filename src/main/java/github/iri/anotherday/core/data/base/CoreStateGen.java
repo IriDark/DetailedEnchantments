@@ -1,8 +1,11 @@
-package github.iri.anotherday.core.data;
+package github.iri.anotherday.core.data.base;
 
+import net.minecraft.core.*;
 import net.minecraft.data.*;
+import net.minecraft.data.models.blockstates.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraftforge.client.model.generators.*;
 import net.minecraftforge.common.data.*;
 import net.minecraftforge.registries.*;
@@ -35,6 +38,14 @@ public abstract class CoreStateGen extends BlockStateProvider{
     public void registerSlab(Block slab, Block texture){
         slabBlock((SlabBlock)slab, blockTexture(texture), blockTexture(texture));
         blockItem(slab);
+    }
+
+    public PropertyDispatch createHorizontalFacingDispatch() {
+        return PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING).select(Direction.EAST, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)).select(Direction.SOUTH, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)).select(Direction.WEST, Variant.variant().with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)).select(Direction.NORTH, Variant.variant());
+    }
+
+    public ResourceLocation extend(ResourceLocation rl, String suffix) {
+        return new ResourceLocation(rl.getNamespace(), rl.getPath() + suffix);
     }
 
     public void registerDoor(Block door){

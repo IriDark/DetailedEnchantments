@@ -1,5 +1,6 @@
 package github.iri.anotherday.core.ai;
 
+import github.iri.anotherday.registries.*;
 import net.minecraft.core.*;
 import net.minecraft.tags.*;
 import net.minecraft.world.entity.*;
@@ -16,7 +17,6 @@ public class SquirrelNavigation extends GroundPathNavigation{
 
    @Nullable
    private BlockPos pathToPosition;
-
    public SquirrelNavigation(Mob pMob, Level pLevel) {
       super(pMob, pLevel);
    }
@@ -62,10 +62,7 @@ public class SquirrelNavigation extends GroundPathNavigation{
       }
    }
 
-   /**
-    * Checks if the mob is horizontally colliding with a block that has the CLIMBABLE_WALLS tag.
-    */
-   private boolean isAgainstClimbableWall() {
+   public boolean isAgainstClimbableWall() {
         Vec3 delta = this.mob.getDeltaMovement();
         Vec3 horizontalDelta = new Vec3(delta.x, 0, delta.z);
         if (horizontalDelta.lengthSqr() == 0) {
@@ -76,21 +73,19 @@ public class SquirrelNavigation extends GroundPathNavigation{
         AABB currentAABB = this.mob.getBoundingBox();
         AABB futureAABB = currentAABB.move(horizontalDelta);
 
-        for (BlockPos pos : BlockPos.betweenClosed(
-                (int) Math.floor(futureAABB.minX), (int) Math.floor(futureAABB.minY), (int) Math.floor(futureAABB.minZ),
-                (int) Math.ceil(futureAABB.maxX), (int) Math.ceil(futureAABB.maxY), (int) Math.ceil(futureAABB.maxZ))) {
-            
+        for (BlockPos pos : BlockPos.betweenClosed((int) Math.floor(futureAABB.minX), (int) Math.floor(futureAABB.minY), (int) Math.floor(futureAABB.minZ), (int) Math.ceil(futureAABB.maxX), (int) Math.ceil(futureAABB.maxY), (int) Math.ceil(futureAABB.maxZ))) {
             BlockState blockState = this.level.getBlockState(pos);
             VoxelShape blockShape = blockState.getCollisionShape(this.level, pos);
 
             if (blockShape.isEmpty()) continue;
 
-            if (blockShape.move(pos.getX(), pos.getY(), pos.getZ()).intersects(futureAABB)) {
-                if (blockState.is(BlockTags.LOGS)) {
-                    return true; // Found a climbable block!
+            if (Shapes.joinIsNotEmpty(blockShape.move(pos.getX(), pos.getY(), pos.getZ()), Shapes.create(futureAABB), BooleanOp.AND)) {
+                if (blockState.is(TagsRegistry.SQUIRREL_CLIMBABLE)) {
+                    return true;
                 }
             }
         }
-        return false; // No climbable wall found
+
+        return false;
     }
 }
