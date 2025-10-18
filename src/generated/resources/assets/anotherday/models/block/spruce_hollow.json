@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "anotherday:block/spruce_hollow",
+    "side": "minecraft:block/spruce_log",
+    "top": "minecraft:block/spruce_log_top"
+  }
+}
