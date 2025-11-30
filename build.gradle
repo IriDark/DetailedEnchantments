@@ -78,14 +78,18 @@ repositories{
     mavenLocal()
     mavenCentral()
     maven { url = "https://maven.komaru.ru/repository/maven-releases" }
+    maven { url "https://cursemaven.com"}
+    maven { url "https://maven.blamejared.com"}
 }
 
 dependencies{
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    runtimeOnly fg.deobf("pro.komaru:Tridot:${minecraft_version}-${tridot_version}")
-    compileOnly fg.deobf("pro.komaru:Tridot:${minecraft_version}-${tridot_version}:api")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    implementation fg.deobf("curse.maven:jade-324717:4986594")
+    implementation fg.deobf("curse.maven:configured-457570:5180900")
 }
 
 tasks.named('processResources', ProcessResources).configure{

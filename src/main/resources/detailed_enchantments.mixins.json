@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "github.iri.detailed_enchantments.core.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "detailed_enchantments.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "EnchantmentScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
