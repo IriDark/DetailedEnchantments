@@ -45,5 +45,11 @@
   "detailed_enchantments.incompatible": "Incompatible With",
   "detailed_enchantments.tradeable": "Tradeable",
   "detailed_enchantments.not_tradeable": "Not Tradeable",
-  "detailed_enchantments.rarity": "Rarity: %s"
+  "detailed_enchantments.rarity": "Rarity: %s",
+  "detailed_enchantments.damage_bonus": "Damage bonus against %s from %s -> %s",
+  "detailed_enchantments.undead": "Undead mobs",
+  "detailed_enchantments.arthropod": "Arthropod mobs",
+  "detailed_enchantments.illager": "Illager mobs",
+  "detailed_enchantments.water": "Water mobs",
+  "detailed_enchantments.all": "all mobs"
 }

@@ -23,6 +23,9 @@ import java.util.*;
 @Mixin(EnchantmentScreen.class)
 public class EnchantmentScreenMixin{
 
+    @Shadow
+    private ItemStack last;
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderComponentTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;II)V"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     private void onRenderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci, boolean flag, int i, int j, int k, Enchantment enchantment, int l, int i1, List<Component> list) {
         if(ClientConfig.ONLY_ITEMS.get()) return;
@@ -31,6 +34,6 @@ public class EnchantmentScreenMixin{
         var key = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
         if(key == null) return;
 
-        EnchantmentHandler.handle(guiGraphics, mouseX, mouseY, enchantment, list, key);
+        EnchantmentHandler.handle(guiGraphics, mouseX, mouseY, enchantment, l, last, list, key);
     }
 }
