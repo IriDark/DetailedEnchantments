@@ -1,10 +1,14 @@
 package github.iri.detailed_enchantments.core;
 
 import com.google.common.collect.*;
+import com.mojang.blaze3d.systems.*;
+import github.iri.detailed_enchantments.*;
 import net.minecraft.*;
+import net.minecraft.client.*;
 import net.minecraft.client.resources.language.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.*;
@@ -58,6 +62,16 @@ public class DEUtil{
         }
 
         return null;
+    }
+
+    public static ResourceLocation getDefaultTexture(Enchantment.Rarity rarity) {
+        return DetailedEnchantments.loc("textures/gui/tooltips/enchantment_" + rarity.name().toLowerCase() + ".png");
+    }
+
+    public static ResourceLocation getEnchantmentIcon(ResourceLocation tex, Enchantment.Rarity rarity) {
+        var defaultTex = getDefaultTexture(rarity);
+        var resourceManager = Minecraft.getInstance().getResourceManager();
+        return resourceManager.getResource(tex).isPresent() ? tex : defaultTex;
     }
 
     public static double getItemAttackDamage(ItemStack stack, MobType targetType) {

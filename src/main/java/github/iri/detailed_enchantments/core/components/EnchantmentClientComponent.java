@@ -11,222 +11,313 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.*;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 import org.joml.Matrix4f;
 
-import java.util.List;
+import java.util.*;
 
-public class EnchantmentClientComponent implements ClientTooltipComponent {
+public class EnchantmentClientComponent implements ClientTooltipComponent{
     private final ResourceLocation icon;
-    private final Enchantment.Rarity rarity;
+
+    private record Section(int startY, int height, int width, SectionType type){}
+
+    private enum SectionType{ICON, NAME, DESCRIPTION, DAMAGE, SEPARATOR, STATS, INCOMPATS}
+
     private final List<FormattedCharSequence> descriptionLines;
     private final List<FormattedCharSequence> incompatibilityLines;
+    private final List<Section> sections = new ArrayList<>();
 
     private final Enchantment enchantment;
+    private final Enchantment.Rarity rarity;
+
     private final int enchLevel;
+    private final int maxLevel;
+    private final boolean tradeable;
 
     private final ItemStack itemStack;
-    private final int maxLevel;
-    private final boolean isTradeable;
 
     private final int iconSize = ClientConfig.ENCHANTMENT_ICON_SIZE.get();
     private final int verticalGap = 6;
     private final int sectionGap = 12;
     private final int statsGap = 8;
 
-    private final int totalWidth;
-    private final int totalHeight;
+    private int totalWidth;
+    private int totalHeight;
 
-    private final int descStartY;
-    private final int separatorYOffset;
-    private final int statsStartY;
-
-    //todo refactor
-    public EnchantmentClientComponent(EnchantmentComponent comp) {
+    public EnchantmentClientComponent(EnchantmentComponent comp){
         this.icon = comp.icon();
         this.rarity = comp.enchantment().getRarity();
         this.maxLevel = comp.enchantment().getMaxLevel();
-        this.isTradeable = comp.enchantment().isTradeable();
+        this.tradeable = comp.enchantment().isTradeable();
         this.enchantment = comp.enchantment();
         this.enchLevel = comp.level();
         this.itemStack = comp.stack();
 
         Font font = Minecraft.getInstance().font;
-        this.descriptionLines = Language.getInstance().getVisualOrder(
-        font.getSplitter().splitLines(comp.description(), 200, comp.description().getStyle())
-        );
+        this.descriptionLines = getVisualOrder(comp.description(), comp.description().getStyle(), font);
 
         Component incompLabel = comp.incompatibilities();
-        if (incompLabel.getString().isEmpty()) {
+        if(incompLabel.getString().isEmpty()){
             this.incompatibilityLines = List.of();
-        } else {
-            this.incompatibilityLines = Language.getInstance().getVisualOrder(
-            font.getSplitter().splitLines(incompLabel, 200, incompLabel.getStyle())
-            );
+        }else{
+            this.incompatibilityLines = getVisualOrder(incompLabel, incompLabel.getStyle(), font);
         }
 
-        int wDesc = 0;
-        for (var line : descriptionLines) wDesc = Math.max(wDesc, font.width(line));
+        computeLayout(font);
+    }
 
-        int hDesc = 0;
+    private static List<FormattedCharSequence> getVisualOrder(Component component, Style style, Font font){
+        return Language.getInstance().getVisualOrder(font.getSplitter().splitLines(component, 200, style));
+    }
+
+    private void computeLayout(Font font) {
+        int y = 0;
+        List<Integer> widths = new ArrayList<>();
+
+        // NAME
+        sections.add(new Section(y, 12, 12, SectionType.NAME));
+        y += 6;
+        widths.add(iconSize);
+
+        // ICON
+        sections.add(new Section(y, iconSize, iconSize, SectionType.ICON));
+        y += iconSize + verticalGap;
+        widths.add(iconSize);
+
+        // DESCRIPTION
+        int descW = measureWidth(font, descriptionLines);
+        int descH = measureHeight(descriptionLines);
+        sections.add(new Section(y, descH, descW, SectionType.DESCRIPTION));
+        y += descH;
+        widths.add(descW);
+
+        // DAMAGE BONUS
         MobType type = DEUtil.getEnchantmentTarget(enchantment, enchLevel);
-        float attackBonus = enchantment.getDamageBonus(enchLevel, type, itemStack);
-        float currentDamage = (float)DEUtil.getItemAttackDamage(itemStack, type);
-        if(type != null && attackBonus > 0 && currentDamage > 1) {
-            Component line = getDamageBonusComponent(type, currentDamage, attackBonus);
-            wDesc += Math.max(wDesc, font.width(line)) / 2;
-            hDesc = 12;
+        float bonus = enchantment.getDamageBonus(enchLevel, type, itemStack);
+        float base = (float)DEUtil.getItemAttackDamage(itemStack, type);
+        boolean showDamage = type != null && bonus > 0 && base > 1;
+
+        if (showDamage) {
+            Component dmg = getDamageComponent(type, base, bonus);
+            int w = font.width(dmg);
+            sections.add(new Section(y, 12, w, SectionType.DAMAGE));
+            y += sectionGap;
+            widths.add(w);
         }
 
-        int wIncomp = 0;
-        if(shouldShowIncompats()){
-            for(var line : incompatibilityLines) wIncomp = Math.max(wIncomp, font.width(line));
+        // SEPARATOR
+        if (shouldShowStats()) {
+            sections.add(new Section(y, 2, 100, SectionType.SEPARATOR));
+            y += 8;
         }
 
-        Component rarityName = Component.translatable("detailed_enchantments.rarity", getRarityName(this.rarity));
-        Component lvlText = Component.translatable("detailed_enchantments.max_level", maxLevel);
-        Component tradeText = isTradeable ? Component.translatable("detailed_enchantments.tradeable") : Component.translatable("detailed_enchantments.not_tradeable");
-        int wStats = getRowWidth(font, lvlText, rarityName, tradeText);
+        // STATS
+        int statsW = measureStatsWidth(font);
+        sections.add(new Section(y, 2, statsW, SectionType.STATS));
+        y += sectionGap;
+        widths.add(statsW);
 
-        this.totalWidth = Math.max(100, Math.max(wDesc, Math.max(wStats, wIncomp)));
-        int currentY = iconSize + verticalGap;
-
-        this.descStartY = currentY;
-        currentY += (descriptionLines.size() * 9) + sectionGap;
-
-        this.separatorYOffset = currentY;
-        if(shouldShowSection()) currentY += 3;
-
-        this.statsStartY = currentY + 4;
-        if(shouldShowSection()) currentY += 9 + sectionGap;
+        // INCOMPATS
         if (shouldShowIncompats()) {
-            currentY += 9 + 4 + (incompatibilityLines.size() * 9);
+            int w = measureWidth(font, incompatibilityLines);
+            int h = 12 + measureHeight(incompatibilityLines);
+            sections.add(new Section(y, h, w, SectionType.INCOMPATS));
+            y += h;
+            widths.add(w);
         }
 
-        this.totalHeight = currentY + hDesc;
+        this.totalWidth = Math.max(100, widths.stream().max(Integer::compare).orElse(100));
+        this.totalHeight = y;
     }
 
-    private int getRowWidth(Font font, Component lvlText, Component rarityName, Component tradeText){
-        int wStats = 0;
-        if(ClientConfig.SHOW_MAX_LEVEL.get())  wStats += font.width(lvlText);
-        if(ClientConfig.SHOW_RARITY.get()) wStats += statsGap + font.width(rarityName);
-        if(ClientConfig.SHOW_TRADE_STATUS.get()) wStats += statsGap + font.width(tradeText);
-        return wStats;
+    private int measureWidth(Font font, List<FormattedCharSequence> lines) {
+        int w = 0;
+        for (var l : lines) w = Math.max(w, font.width(l));
+        return w;
     }
 
-    private static Component getDamageBonusComponent(MobType type, float currentDamage, float attackBonus){
-        return Component.translatable("detailed_enchantments.damage_bonus", DEUtil.getTypeName(type).getString(), currentDamage, (currentDamage + attackBonus)).withStyle(ChatFormatting.DARK_GRAY);
+    private boolean shouldShowStats(){
+        return ClientConfig.SHOW_MAX_LEVEL.get() || ClientConfig.SHOW_RARITY.get() || ClientConfig.SHOW_TRADE_STATUS.get();
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(){
         return totalHeight;
     }
 
     @Override
-    public int getWidth(Font font) {
+    public int getWidth(Font font){
         return totalWidth;
     }
 
     @Override
-    public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
-        RenderSystem.enableBlend();
-        int iconX = x + (totalWidth - iconSize) / 2;
-        guiGraphics.blit(this.icon, iconX, y + 4, 0, 0, iconSize, iconSize, iconSize, iconSize);
-
-        MobType type = DEUtil.getEnchantmentTarget(enchantment, enchLevel);
-        float attackBonus = enchantment.getDamageBonus(enchLevel, type, itemStack);
-        float currentDamage = (float)DEUtil.getItemAttackDamage(itemStack, type);
-        if(type != null && attackBonus > 0 && currentDamage > 1) {
-            y += 12;
-        }
-
-        if(shouldShowIncompats() || shouldShowSection()){
-            int sepY = y + separatorYOffset - 2;
-            int centerX = x + (totalWidth / 2);
-            int colorSolid = 0xFF555555;
-            int colorClear = 0x00555555;
-
-            drawHorizontalGradient(guiGraphics, x, sepY, centerX, sepY + 1, colorClear, colorSolid);
-            drawHorizontalGradient(guiGraphics, centerX, sepY, x + totalWidth, sepY + 1, colorSolid, colorClear);
+    public void renderImage(Font font, int x, int y, GuiGraphics g){
+        for(Section s : sections){
+            int drawY = y + s.startY();
+            renderSectionImage(s, x, drawY, g);
         }
     }
 
     @Override
-    public void renderText(Font font, int x, int y, Matrix4f matrix, MultiBufferSource.BufferSource buffer) {
-        Component name = enchantment.getFullname(enchLevel);
-        int centeredX = x + (totalWidth - font.width(name)) / 2;
-        font.drawInBatch(name, centeredX, y - 8, 0xAAAAAA, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-        int currentTextY = y + descStartY;
-        for (FormattedCharSequence line : descriptionLines) {
-            int lineX = x + (totalWidth - font.width(line)) / 2; // Center Align
-            font.drawInBatch(line, lineX, currentTextY, -1, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-            currentTextY += 12;
-        }
-
-        MobType type = DEUtil.getEnchantmentTarget(enchantment, enchLevel);
-        float attackBonus = enchantment.getDamageBonus(enchLevel, type, itemStack);
-        float currentDamage = (float)DEUtil.getItemAttackDamage(itemStack, type);
-        if(type != null && attackBonus > 0 && currentDamage > 1) {
-            Component line = getDamageBonusComponent(type, currentDamage, attackBonus);
-            int lineX = x + (totalWidth - font.width(line)) / 2;
-            font.drawInBatch(line, lineX, currentTextY, 0xAAAAAA, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-            y += 12;
-        }
-
-        int statsY = y + statsStartY;
-        Component rarityName = Component.translatable("detailed_enchantments.rarity", getRarityName(this.rarity));
-        Component lvlText = Component.translatable("detailed_enchantments.max_level", maxLevel);
-        Component tradeText = isTradeable ? Component.translatable("detailed_enchantments.tradeable") : Component.translatable("detailed_enchantments.not_tradeable");
-        int rowWidth = getRowWidth(font, lvlText, rarityName, tradeText);
-        int drawX = x + (totalWidth - rowWidth) / 2;
-
-        if(ClientConfig.SHOW_RARITY.get()){
-            font.drawInBatch(rarityName, drawX, statsY, getRarityColor(this.rarity), true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-            drawX += font.width(rarityName) + statsGap;
-        }
-
-        if(ClientConfig.SHOW_MAX_LEVEL.get()){
-            font.drawInBatch(lvlText, drawX, statsY, 0xFFAA00, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-            drawX += font.width(lvlText) + statsGap;
-        }
-
-        if(ClientConfig.SHOW_TRADE_STATUS.get()){
-            int tradeColor = isTradeable ? 0x55FF55 : 0xFF5555;
-            font.drawInBatch(tradeText, drawX, statsY, tradeColor, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-        }
-
-        if (shouldShowIncompats()) {
-            int incompY = statsY + (shouldShowSection() ? statsGap + 6 : 0);
-
-            Component header = Component.translatable("detailed_enchantments.incompatible");
-            int headerX = x + (totalWidth - font.width(header)) / 2;
-            font.drawInBatch(header, headerX, incompY, 0xAAAAAA, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-
-            incompY += 10;
-            for (FormattedCharSequence line : incompatibilityLines) {
-                int lineX = x + (totalWidth - font.width(line)) / 2;
-                font.drawInBatch(line, lineX, incompY, 0xFF7777, true, matrix, buffer, Font.DisplayMode.NORMAL, 0, 15728880);
-                incompY += 9;
-            }
+    public void renderText(Font font, int x, int y, Matrix4f mat, MultiBufferSource.BufferSource buf){
+        for(Section s : sections){
+            int drawY = y + s.startY();
+            renderSectionText(s, x, drawY, font, mat, buf);
         }
     }
 
-    private boolean shouldShowSection() {
-        return ClientConfig.SHOW_MAX_LEVEL.get() || ClientConfig.SHOW_RARITY.get() || ClientConfig.SHOW_TRADE_STATUS.get();
+    private void renderSectionImage(Section s, int x, int y, GuiGraphics g){
+        switch(s.type){
+            case ICON -> {
+                int ix = x + (totalWidth - iconSize) / 2;
+                g.blit(icon, ix, y, 0, 0, iconSize, iconSize, iconSize, iconSize);
+            }
+
+            case SEPARATOR -> {
+                int mid = x + totalWidth / 2;
+                int colSolid = 0xFF555555;
+                int colClear = 0x00555555;
+                drawHorizontalGradient(g, x, y, mid, y + 1, colClear, colSolid);
+                drawHorizontalGradient(g, mid, y, x + totalWidth, y + 1, colSolid, colClear);
+            }
+
+            default -> {}
+        }
+    }
+
+    private int measureHeight(List<FormattedCharSequence> lines) {
+        return lines.size() * 12;
+    }
+
+    private int measureStatsWidth(Font font) {
+        Component lvl = Component.translatable("detailed_enchantments.max_level", maxLevel);
+        Component rar = Component.translatable("detailed_enchantments.rarity", rarityName());
+        Component trd = getTradeableComponent();
+
+        int w = 0;
+
+        if (ClientConfig.SHOW_RARITY.get()) w += font.width(rar);
+        if (ClientConfig.SHOW_MAX_LEVEL.get()) w += (w > 0 ? statsGap : 0) + font.width(lvl);
+        if (ClientConfig.SHOW_TRADE_STATUS.get()) w += (w > 0 ? statsGap : 0) + font.width(trd);
+
+        return w;
+    }
+
+    private Component getTradeableComponent(){
+        return tradeable ? Component.translatable("detailed_enchantments.tradeable") : Component.translatable("detailed_enchantments.not_tradeable");
+    }
+
+    private void renderSectionText(Section s, int x, int y, Font font, Matrix4f mat, MultiBufferSource.BufferSource buf){
+        switch(s.type){
+            case NAME -> {
+                Component name = enchantment.getFullname(enchLevel);
+                int centeredX = getCenteredX(font, x, name);
+                font.drawInBatch(name, centeredX, y - 8, 0xAAAAAA, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+            }
+
+            case DESCRIPTION -> {
+                int yy = y;
+                for(var line : descriptionLines){
+                    int lx = x + (totalWidth - font.width(line)) / 2;
+                    font.drawInBatch(line, lx, yy, -1, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+                    yy += 12;
+                }
+            }
+
+            case DAMAGE -> {
+                MobType type = DEUtil.getEnchantmentTarget(enchantment, enchLevel);
+                float bonus = enchantment.getDamageBonus(enchLevel, type, itemStack);
+                float base = (float)DEUtil.getItemAttackDamage(itemStack, type);
+
+                Component dmg = getDamageComponent(type, base, bonus);
+
+                int lx = x + (totalWidth - font.width(dmg)) / 2;
+                font.drawInBatch(dmg, lx, y, 0xAAAAAA, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+            }
+
+            case STATS -> {
+                Component rar = Component.translatable("detailed_enchantments.rarity", rarityName());
+                Component lvl = Component.translatable("detailed_enchantments.max_level", maxLevel);
+                Component trd = getTradeableComponent();
+
+                int rowW = measureStatsWidth(font);
+                int drawX = x + (totalWidth - rowW) / 2;
+
+                if(ClientConfig.SHOW_RARITY.get()){
+                    font.drawInBatch(rar, drawX, y, rarityColor(), true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+                    drawX += font.width(rar) + statsGap;
+                }
+
+                if(ClientConfig.SHOW_MAX_LEVEL.get()){
+                    font.drawInBatch(lvl, drawX, y, 0xFFAA00, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+                    drawX += font.width(lvl) + statsGap;
+                }
+
+                if(ClientConfig.SHOW_TRADE_STATUS.get()){
+                    int c = tradeable ? 0x55FF55 : 0xFF5555;
+                    font.drawInBatch(trd, drawX, y, c, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+                }
+            }
+
+            case INCOMPATS -> {
+                Component header = Component.translatable("detailed_enchantments.incompatible");
+                int hx = x + (totalWidth - font.width(header)) / 2;
+                font.drawInBatch(header, hx, y, 0xAAAAAA, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+
+                int yy = y + 12;
+                for(var line : incompatibilityLines){
+                    int lx = x + (totalWidth - font.width(line)) / 2;
+                    font.drawInBatch(line, lx, yy, 0xFF7777, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
+                    yy += 12;
+                }
+            }
+
+            default -> {}
+        }
+    }
+
+    private static Component getDamageComponent(MobType type, float base, float bonus){
+        return Component.translatable("detailed_enchantments.damage_bonus", DEUtil.getTypeName(type).getString(), base, base + bonus).withStyle(ChatFormatting.DARK_GRAY);
+    }
+
+    private record ColorResult(float a, float r, float g, float b){ }
+    private ColorResult color(int c){
+        float a = ((c >> 24) & 255) / 255f;
+        float r = ((c >> 16) & 255) / 255f;
+        float g = ((c >> 8) & 255) / 255f;
+        float b = (c & 255) / 255f;
+        return new ColorResult(a, r, g, b);
+    }
+
+    private int rarityColor(){
+        return switch(rarity){
+            case COMMON -> 0xdbe1e9;
+            case UNCOMMON -> 0xb9ddcb;
+            case RARE -> 0x9096ff;
+            case VERY_RARE -> 0xdba6ff;
+        };
+    }
+
+    private String rarityName(){
+        String s = rarity.name();
+        return s.charAt(0) + s.substring(1).toLowerCase();
+    }
+
+    private int getCenteredX(Font font, int x, Component name){
+        return x + (totalWidth - font.width(name)) / 2;
     }
 
     private boolean shouldShowIncompats(){
         return !incompatibilityLines.isEmpty() && ClientConfig.SHOW_INCOMPATIBILITIES.get();
     }
 
-    private void drawHorizontalGradient(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int colorStart, int colorEnd) {
+    private void drawHorizontalGradient(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int colorStart, int colorEnd){
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -234,8 +325,8 @@ public class EnchantmentClientComponent implements ClientTooltipComponent {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         Matrix4f matrix = guiGraphics.pose().last().pose();
-        ColorResult result = getColorResult(colorStart);
-        ColorResult endResult = getColorResult(colorEnd);
+        ColorResult result = color(colorStart);
+        ColorResult endResult = color(colorEnd);
 
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferbuilder.vertex(matrix, (float)x2, (float)y1, 0.0F).color(endResult.r(), endResult.g(), endResult.b(), endResult.a()).endVertex();
@@ -245,29 +336,5 @@ public class EnchantmentClientComponent implements ClientTooltipComponent {
 
         BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.disableBlend();
-    }
-
-    private static @NotNull ColorResult getColorResult(int color){
-        float a = (float)(color >> 24 & 255) / 255.0F;
-        float r = (float)(color >> 16 & 255) / 255.0F;
-        float g = (float)(color >> 8 & 255) / 255.0F;
-        float b = (float)(color & 255) / 255.0F;
-        return new ColorResult(a, r, g, b);
-    }
-
-    private record ColorResult(float a, float r, float g, float b){}
-
-    private int getRarityColor(Enchantment.Rarity rarity) {
-        return switch (rarity) {
-            case COMMON -> 0xdbe1e9;
-            case UNCOMMON -> 0xb9ddcb;
-            case RARE -> 0x9096ff;
-            case VERY_RARE -> 0xdba6ff;
-        };
-    }
-
-    private String getRarityName(Enchantment.Rarity rarity) {
-        String s = rarity.name();
-        return s.charAt(0) + s.substring(1).toLowerCase();
     }
 }

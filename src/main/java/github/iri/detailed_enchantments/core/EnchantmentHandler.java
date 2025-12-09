@@ -1,5 +1,7 @@
 package github.iri.detailed_enchantments.core;
 
+import com.mojang.blaze3d.systems.*;
+import github.iri.detailed_enchantments.*;
 import github.iri.detailed_enchantments.core.components.*;
 import net.minecraft.*;
 import net.minecraft.client.*;
@@ -21,7 +23,7 @@ public class EnchantmentHandler{
         var texture = new ResourceLocation(key.getNamespace(), "textures/gui/tooltips/" + key.getPath() + ".png");
 
         Optional<TooltipComponent> component;
-        component = Optional.of(new EnchantmentComponent(descriptionText.copy(), enchantment, level, stack, texture, getCachedIncompatibilities(enchantment)));
+        component = Optional.of(new EnchantmentComponent(descriptionText.copy(), enchantment, level, stack, DEUtil.getEnchantmentIcon(texture, enchantment.getRarity()), getCachedIncompatibilities(enchantment)));
         guiGraphics.renderTooltip(Minecraft.getInstance().font, List.of(Component.empty()), component, mouseX, mouseY);
     }
 

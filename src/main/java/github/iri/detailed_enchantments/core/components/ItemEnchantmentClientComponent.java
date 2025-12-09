@@ -2,6 +2,7 @@ package github.iri.detailed_enchantments.core.components;
 
 import com.mojang.blaze3d.systems.*;
 import github.iri.detailed_enchantments.*;
+import github.iri.detailed_enchantments.core.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.inventory.tooltip.*;
@@ -71,19 +72,11 @@ public class ItemEnchantmentClientComponent implements ClientTooltipComponent{
         }
     }
 
-    public ResourceLocation getDefaultTexture() {
-        return DetailedEnchantments.loc("textures/gui/tooltips/enchantment_" + this.rarity.name().toLowerCase() + ".png");
-    }
-
     @Override
     public void renderImage(Font pFont, int pX, int pY, GuiGraphics pGuiGraphics) {
-        var defaultTex = getDefaultTexture();
         RenderSystem.enableBlend();
-        var resourceManager = Minecraft.getInstance().getResourceManager();
-        var textureToBind = resourceManager.getResource(icon).isPresent() ? icon : defaultTex;
-
         pGuiGraphics.blit(bg, pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
-        pGuiGraphics.blit(textureToBind, pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
+        pGuiGraphics.blit(DEUtil.getEnchantmentIcon(icon, this.rarity), pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
         RenderSystem.disableBlend();
     }
 }
