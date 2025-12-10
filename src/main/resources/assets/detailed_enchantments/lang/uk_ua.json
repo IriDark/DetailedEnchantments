@@ -38,5 +38,21 @@
   "enchantment.minecraft.piercing.desc": "Дозволяє снарядам пробивати мобів наскрізь.",
   "enchantment.minecraft.soul_speed.desc": "Збільшує швидкість пересування на блоках душ.",
   "enchantment.minecraft.swift_sneak.desc": "Збільшує швидкість пересування під час підкрадання.",
-  "detailed_enchantments.shift_for_details": "Утримуйте Shift, щоб переглянути опис зачарування."
+  "detailed_enchantments.shift_for_details": "Утримуйте Shift, щоб переглянути опис зачарування.",
+  "detailed_enchantments.max_level": "Максимальний рівень: %s",
+  "detailed_enchantments.incompatible": "Несумісне із",
+  "detailed_enchantments.tradeable": "Торгується",
+  "detailed_enchantments.not_tradeable": "Не торгується",
+  "detailed_enchantments.rarity": "Рідкість: %s",
+  "detailed_enchantments.common": "Звичайна",
+  "detailed_enchantments.uncommon": "Незвичайна",
+  "detailed_enchantments.rare": "Рідкісна",
+  "detailed_enchantments.very_rare": "Дуже рідкісна",
+  "detailed_enchantments.damage_bonus": "Бонус шкоди до %s із ",
+  "detailed_enchantments.undead": "Нежиті",
+  "detailed_enchantments.arthropod": "Членистоногих",
+  "detailed_enchantments.illager": "Ілладжерів",
+  "detailed_enchantments.water": "Водних створінь",
+  "detailed_enchantments.all": "усіх створінь",
+  "detailed_enchantments.reduction": "Зниження шкоди: "
 }

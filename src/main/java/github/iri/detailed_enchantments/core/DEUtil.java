@@ -9,11 +9,15 @@ import net.minecraft.client.resources.language.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.*;
+import net.minecraft.tags.*;
+import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.*;
+import net.minecraft.world.level.*;
+import net.minecraftforge.api.distmarker.*;
 import net.minecraftforge.registries.*;
 
 import java.awt.*;
@@ -40,6 +44,40 @@ public class DEUtil{
         }
 
         return Component.translatable("detailed_enchantments.all");
+    }
+
+    public static Component getRarity(Enchantment.Rarity rarity) {
+        if(rarity == Enchantment.Rarity.COMMON) {
+            return Component.translatable("detailed_enchantments.common");
+        }
+        if(rarity == Enchantment.Rarity.UNCOMMON) {
+            return Component.translatable("detailed_enchantments.uncommon");
+        }
+        if(rarity == Enchantment.Rarity.RARE) {
+            return Component.translatable("detailed_enchantments.rare");
+        }
+        if(rarity == Enchantment.Rarity.VERY_RARE) {
+            return Component.translatable("detailed_enchantments.very_rare");
+        }
+
+        return Component.translatable("detailed_enchantments.all");
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static DamageSource getDamageSource(ProtectionEnchantment pEnchantment) {
+        Level level = Minecraft.getInstance().level;
+        DamageSources sources = level.damageSources();
+        if (pEnchantment.type == ProtectionEnchantment.Type.FIRE) {
+            return sources.inFire();
+        } else if (pEnchantment.type == ProtectionEnchantment.Type.FALL) {
+            return sources.fall();
+        } else if (pEnchantment.type == ProtectionEnchantment.Type.EXPLOSION) {
+            return sources.explosion(null);
+        } else if (pEnchantment.type == ProtectionEnchantment.Type.PROJECTILE) {
+            return sources.mobProjectile(null, null);
+        }
+
+        return sources.generic();
     }
 
     public static MobType getEnchantmentTarget(Enchantment enchant, int level) {

@@ -14,9 +14,10 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.*;
 import org.jetbrains.annotations.*;
 import org.joml.Matrix4f;
 
@@ -27,7 +28,7 @@ public class EnchantmentClientComponent implements ClientTooltipComponent{
 
     private record Section(int startY, int height, int width, SectionType type){}
 
-    private enum SectionType{ICON, NAME, DESCRIPTION, DAMAGE, SEPARATOR, STATS, INCOMPATS}
+    private enum SectionType{ICON, NAME, DESCRIPTION, PROTECTION, DAMAGE, SEPARATOR, STATS, INCOMPATS}
 
     private final List<FormattedCharSequence> descriptionLines;
     private final List<FormattedCharSequence> incompatibilityLines;
@@ -109,6 +110,21 @@ public class EnchantmentClientComponent implements ClientTooltipComponent{
             sections.add(new Section(y, 12, w, SectionType.DAMAGE));
             y += sectionGap;
             widths.add(w);
+        }
+
+        // PROTECTION BONUS
+        if(enchantment instanceof ProtectionEnchantment protection){
+            DamageSource source = DEUtil.getDamageSource(protection);
+            int protectionBonus = protection.getDamageProtection(enchLevel, source);
+            float baseProtection = 0f;
+            boolean showProtection = protectionBonus > 0;
+
+            if (showProtection) {
+                int w = font.width(getProtectionComponent(protection, baseProtection, protectionBonus));
+                sections.add(new Section(y, 12, w, SectionType.PROTECTION));
+                y += sectionGap;
+                widths.add(w);
+            }
         }
 
         // SEPARATOR
@@ -209,10 +225,6 @@ public class EnchantmentClientComponent implements ClientTooltipComponent{
         return w;
     }
 
-    private Component getTradeableComponent(){
-        return tradeable ? Component.translatable("detailed_enchantments.tradeable") : Component.translatable("detailed_enchantments.not_tradeable");
-    }
-
     private void renderSectionText(Section s, int x, int y, Font font, Matrix4f mat, MultiBufferSource.BufferSource buf){
         switch(s.type){
             case NAME -> {
@@ -227,6 +239,18 @@ public class EnchantmentClientComponent implements ClientTooltipComponent{
                     int lx = x + (totalWidth - font.width(line)) / 2;
                     font.drawInBatch(line, lx, yy, -1, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
                     yy += 12;
+                }
+            }
+
+            case PROTECTION -> {
+                if(enchantment instanceof ProtectionEnchantment protection){
+                    DamageSource source = DEUtil.getDamageSource(protection);
+                    int protectionBonus = protection.getDamageProtection(enchLevel, source);
+                    float baseProtection = 0f;
+                    Component prot = getProtectionComponent(protection, protectionBonus, baseProtection);
+
+                    int lx = x + (totalWidth - font.width(prot)) / 2;
+                    font.drawInBatch(prot, lx, y, 0xAAAAAA, true, mat, buf, Font.DisplayMode.NORMAL, 0, 15728880);
                 }
             }
 
@@ -282,8 +306,21 @@ public class EnchantmentClientComponent implements ClientTooltipComponent{
         }
     }
 
+    private Component rarityName(){
+        return DEUtil.getRarity(rarity);
+    }
+
+    private Component getProtectionComponent(ProtectionEnchantment ench, float base, float bonus) {
+        int percentage =  (int) base + (int) (bonus * 4);
+        return Component.translatable("detailed_enchantments.reduction").withStyle(ChatFormatting.GRAY).append(Component.literal("+" + percentage + "%").withStyle(ChatFormatting.BLUE));
+    }
+
     private static Component getDamageComponent(MobType type, float base, float bonus){
-        return Component.translatable("detailed_enchantments.damage_bonus", DEUtil.getTypeName(type).getString(), base, base + bonus).withStyle(ChatFormatting.DARK_GRAY);
+        return Component.translatable("detailed_enchantments.damage_bonus", DEUtil.getTypeName(type).getString()).withStyle(ChatFormatting.GRAY).append(Component.literal(base + " -> " +  (base + bonus)).withStyle(ChatFormatting.BLUE));
+    }
+
+    private Component getTradeableComponent(){
+        return tradeable ? Component.translatable("detailed_enchantments.tradeable") : Component.translatable("detailed_enchantments.not_tradeable");
     }
 
     private record ColorResult(float a, float r, float g, float b){ }
@@ -302,11 +339,6 @@ public class EnchantmentClientComponent implements ClientTooltipComponent{
             case RARE -> 0x9096ff;
             case VERY_RARE -> 0xdba6ff;
         };
-    }
-
-    private String rarityName(){
-        String s = rarity.name();
-        return s.charAt(0) + s.substring(1).toLowerCase();
     }
 
     private int getCenteredX(Font font, int x, Component name){

@@ -38,5 +38,21 @@
   "enchantment.minecraft.piercing.desc": "Позволяет снарядам пробивать существ насквозь.",
   "enchantment.minecraft.soul_speed.desc": "Увеличивает скорость передвижения на блоках душ.",
   "enchantment.minecraft.swift_sneak.desc": "Увеличивает скорость передвижения при подкрадывании.",
-  "detailed_enchantments.shift_for_details": "Удерживайте клавишу Shift, чтобы просмотреть описания чар."
+  "detailed_enchantments.shift_for_details": "Удерживайте клавишу Shift, чтобы просмотреть описания чар.",
+  "detailed_enchantments.max_level": "Максимальный уровень: %s",
+  "detailed_enchantments.incompatible": "Несовместимо с",
+  "detailed_enchantments.tradeable": "Торгуется",
+  "detailed_enchantments.not_tradeable": "Не торгуется",
+  "detailed_enchantments.rarity": "Редкость: %s",
+  "detailed_enchantments.common": "Обычный",
+  "detailed_enchantments.uncommon": "Необычный",
+  "detailed_enchantments.rare": "Редкий",
+  "detailed_enchantments.very_rare": "Очень редкий",
+  "detailed_enchantments.damage_bonus": "Бонус урона к %s с ",
+  "detailed_enchantments.undead": "Нежити",
+  "detailed_enchantments.arthropod": "Членистоногим существам",
+  "detailed_enchantments.illager": "Илладжеров",
+  "detailed_enchantments.water": "Водным существам",
+  "detailed_enchantments.all": "всех существ",
+  "detailed_enchantments.reduction": "Понижение урона: "
 }
