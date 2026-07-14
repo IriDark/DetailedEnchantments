@@ -43,6 +43,7 @@
   "detailed_enchantments.incompatible": "Incompatible With",
   "detailed_enchantments.tradeable": "Tradeable",
   "detailed_enchantments.not_tradeable": "Not Tradeable",
+  "detailed_enchantments.enchantments": "Enchantments",
   "detailed_enchantments.rarity": "Rarity: %s",
   "detailed_enchantments.common": "Common",
   "detailed_enchantments.uncommon": "Uncommon",

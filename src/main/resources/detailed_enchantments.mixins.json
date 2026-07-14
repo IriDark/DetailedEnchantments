@@ -7,7 +7,8 @@
   "mixins": [
   ],
   "client": [
-    "EnchantmentScreenMixin"
+    "EnchantmentScreenMixin",
+    "TooltipRenderUtilMixin"
   ],
   "injectors": {
     "defaultRequire": 1

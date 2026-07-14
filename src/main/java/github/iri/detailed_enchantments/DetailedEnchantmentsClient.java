@@ -14,6 +14,7 @@ public class DetailedEnchantmentsClient{
         @SubscribeEvent
         public static void registerComponents(RegisterClientTooltipComponentFactoriesEvent e){
             e.register(EnchantmentComponent.class, EnchantmentClientComponent::new);
+            e.register(SeparatorComponent.class, c -> SeparatorClientComponent.create(c.component()));
             e.register(ItemEnchantmentComponent.class, c -> ItemEnchantmentClientComponent.create(c.component(), c.rarity(), c.icon(), c.paddingTop(), c.iconSize()));
         }
     }

@@ -8,8 +8,8 @@ public class ClientConfig{
     ICON_SIZE, ICON_SIZE_MIN, ICON_DECREASING_COUNT,
     ENCHANTMENT_ICON_SIZE;
 
-    public static ForgeConfigSpec.ConfigValue<Boolean> SHIFT_FOR_DETAILS, ONLY_ENCHANTING_TABLE, ONLY_ITEMS,
-
+    public static ForgeConfigSpec.ConfigValue<Boolean>
+    SHIFT_FOR_DETAILS, ONLY_ENCHANTING_TABLE, ONLY_ITEMS, TOOLTIP_DIVIDER, RARITY_BORDERS,
     SHOW_RARITY, SHOW_MAX_LEVEL, SHOW_TRADE_STATUS, SHOW_INCOMPATIBILITIES;
 
     static{
@@ -31,6 +31,8 @@ public class ClientConfig{
         SHIFT_FOR_DETAILS = builder.comment("Is shift needed for description (Default: true)").define("shiftForDetails", true);
         ONLY_ITEMS = builder.comment("Display only on items (Default: false)").define("onlyItems", false);
         ONLY_ENCHANTING_TABLE = builder.comment("Display only on enchanting table (Default: false)").define("onlyEnchantingTable", false);
+        TOOLTIP_DIVIDER = builder.comment("Divider of tooltip description and enchantments: -- Enchantments --  (Default: true)").define("tooltipDivider", true);
+        RARITY_BORDERS = builder.comment("Render rarity borders of enchantment (Default: true)").define("rarityBorders", true);
 
         SHOW_RARITY = builder.comment("Shows rarity of enchantment inside Enchantment screen (Default: true)").define("showRarity", true);
         SHOW_MAX_LEVEL = builder.comment("Shows max level of enchantment inside Enchantment screen (Default: true)").define("showMaxLevel", true);

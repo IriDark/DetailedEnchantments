@@ -3,6 +3,7 @@ package github.iri.detailed_enchantments.core.components;
 import com.mojang.blaze3d.systems.*;
 import github.iri.detailed_enchantments.*;
 import github.iri.detailed_enchantments.core.*;
+import github.iri.detailed_enchantments.core.config.ClientConfig;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.inventory.tooltip.*;
@@ -18,7 +19,6 @@ import java.lang.Math;
 import java.util.*;
 
 public class ItemEnchantmentClientComponent implements ClientTooltipComponent{
-    public final ResourceLocation bg = DetailedEnchantments.loc("textures/gui/tooltips/background.png");
     public final ResourceLocation icon;
     private final Enchantment.Rarity rarity;
 
@@ -75,7 +75,7 @@ public class ItemEnchantmentClientComponent implements ClientTooltipComponent{
     @Override
     public void renderImage(Font pFont, int pX, int pY, GuiGraphics pGuiGraphics) {
         RenderSystem.enableBlend();
-        pGuiGraphics.blit(bg, pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
+        pGuiGraphics.blit(ClientConfig.RARITY_BORDERS.get() ? DetailedEnchantments.loc("textures/gui/tooltips/background_" + this.rarity.name().toLowerCase() +  ".png") : DetailedEnchantments.loc("textures/gui/tooltips/background.png"), pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
         pGuiGraphics.blit(DEUtil.getEnchantmentIcon(icon, this.rarity), pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
         RenderSystem.disableBlend();
     }

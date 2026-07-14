@@ -30,6 +30,22 @@ public class ClientEvents{
         if (ClientConfig.ONLY_ENCHANTING_TABLE.get()) return;
         if (enchMap.isEmpty()) return;
 
+        if(ClientConfig.TOOLTIP_DIVIDER.get()) {
+            int firstEnchIndex = -1;
+            for (Enchantment enchantment : enchMap.keySet()) {
+                int idx = findTextIndex(elements, enchantment.getDescriptionId());
+                if (idx >= 0 && (firstEnchIndex == -1 || idx < firstEnchIndex)) {
+                    firstEnchIndex = idx;
+                }
+            }
+
+            if (firstEnchIndex != -1) {
+                elements.add(firstEnchIndex, Either.right(new SeparatorComponent(
+                        Component.translatable("detailed_enchantments.enchantments").withStyle(ChatFormatting.GRAY)
+                )));
+            }
+        }
+
         if (!ClientConfig.SHIFT_FOR_DETAILS.get() || Screen.hasShiftDown()) {
             for (Map.Entry<Enchantment, Integer> entry : enchMap.entrySet()) {
                 Component descriptionText = DEUtil.getDescription(entry.getKey());
