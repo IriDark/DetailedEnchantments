@@ -40,9 +40,7 @@ public class ClientEvents{
             }
 
             if (firstEnchIndex != -1) {
-                elements.add(firstEnchIndex, Either.right(new SeparatorComponent(
-                        Component.translatable("detailed_enchantments.enchantments").withStyle(ChatFormatting.GRAY)
-                )));
+                elements.add(firstEnchIndex, Either.right(new SeparatorComponent(Component.translatable("detailed_enchantments.enchantments"))));
             }
         }
 

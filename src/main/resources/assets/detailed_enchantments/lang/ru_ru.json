@@ -43,6 +43,7 @@
   "detailed_enchantments.incompatible": "Несовместимо с",
   "detailed_enchantments.tradeable": "Торгуется",
   "detailed_enchantments.not_tradeable": "Не торгуется",
+  "detailed_enchantments.enchantments": "Зачарования",
   "detailed_enchantments.rarity": "Редкость: %s",
   "detailed_enchantments.common": "Обычный",
   "detailed_enchantments.uncommon": "Необычный",

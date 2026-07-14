@@ -43,6 +43,7 @@
   "detailed_enchantments.incompatible": "Несумісне із",
   "detailed_enchantments.tradeable": "Торгується",
   "detailed_enchantments.not_tradeable": "Не торгується",
+  "detailed_enchantments.enchantments": "Зачарування",
   "detailed_enchantments.rarity": "Рідкість: %s",
   "detailed_enchantments.common": "Звичайна",
   "detailed_enchantments.uncommon": "Незвичайна",
