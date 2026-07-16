@@ -55,5 +55,6 @@
   "detailed_enchantments.illager": "Ілладжерів",
   "detailed_enchantments.water": "Водних створінь",
   "detailed_enchantments.all": "усіх створінь",
-  "detailed_enchantments.reduction": "Зниження шкоди: "
+  "detailed_enchantments.reduction": "Зниження шкоди: ",
+  "item.detailed_enchantments.enchantment_value": "⭐ Чаруємість: %s"
 }

@@ -24,6 +24,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.UnaryOperator;
 
 public class DEUtil{
     private static final Map<Enchantment, MutableComponent> DESCRIPTION_CACHE = new ConcurrentHashMap<>();
@@ -145,7 +146,7 @@ public class DEUtil{
                 descriptionKey = e.getDescriptionId() + ".description";
             }
 
-            return Component.translatable(descriptionKey).withStyle(ChatFormatting.DARK_GRAY);
+            return Component.translatable(descriptionKey).withStyle(ench.isCurse() ? Style.EMPTY.withColor(TextColor.parseColor("#5f2c2c")) : Style.EMPTY.withColor(ChatFormatting.DARK_GRAY));
         });
     }
 

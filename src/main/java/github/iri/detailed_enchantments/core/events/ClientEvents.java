@@ -56,12 +56,12 @@ public class ClientEvents{
                 int enchIndex = findTextIndex(elements, enchantment.getDescriptionId());
                 int size = getSize(enchMap);
                 if (enchIndex >= 0 && enchIndex <= elements.size()) {
-                    elements.add(enchIndex + 1, Either.right(new ItemEnchantmentComponent(descriptionText.copy(), enchantment.getRarity(), texture, 0, size)));
+                    elements.add(enchIndex + 1, Either.right(new ItemEnchantmentComponent(descriptionText.copy(), enchantment.getRarity(), texture, enchantment.isCurse(), 2, size)));
                 }
             }
         } else {
             elements.add(1, Either.right(new ItemEnchantmentComponent(
-            Component.translatable("detailed_enchantments.shift_for_details").withStyle(ChatFormatting.DARK_GRAY), Enchantment.Rarity.COMMON, DetailedEnchantments.loc("textures/gui/tooltips/info_box.png"), 0, 10)));
+            Component.translatable("detailed_enchantments.shift_for_details").withStyle(ChatFormatting.DARK_GRAY), Enchantment.Rarity.COMMON, DetailedEnchantments.loc("textures/gui/tooltips/info_box.png"), false, 0, 10)));
         }
     }
 

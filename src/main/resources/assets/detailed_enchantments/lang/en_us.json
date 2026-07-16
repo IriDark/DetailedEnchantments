@@ -55,5 +55,6 @@
   "detailed_enchantments.illager": "Illager mobs",
   "detailed_enchantments.water": "Water mobs",
   "detailed_enchantments.all": "all mobs",
-  "detailed_enchantments.reduction": "Damage Reduction: "
+  "detailed_enchantments.reduction": "Damage Reduction: ",
+  "item.detailed_enchantments.enchantment_value": "⭐ Enchantability: %s"
 }

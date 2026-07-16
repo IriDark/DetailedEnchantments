@@ -10,7 +10,7 @@ public class ClientConfig{
 
     public static ForgeConfigSpec.ConfigValue<Boolean>
     SHIFT_FOR_DETAILS, ONLY_ENCHANTING_TABLE, ONLY_ITEMS, TOOLTIP_DIVIDER, RARITY_BORDERS,
-    SHOW_RARITY, SHOW_MAX_LEVEL, SHOW_TRADE_STATUS, SHOW_INCOMPATIBILITIES;
+    SHOW_RARITY, SHOW_MAX_LEVEL, SHOW_TRADE_STATUS, SHOW_INCOMPATIBILITIES, SHOW_ENCHANTABILITY;
 
     static{
         final Pair<ClientConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
@@ -34,6 +34,7 @@ public class ClientConfig{
         TOOLTIP_DIVIDER = builder.comment("Divider of tooltip description and enchantments: -- Enchantments --  (Default: true)").define("tooltipDivider", true);
         RARITY_BORDERS = builder.comment("Render rarity borders of enchantment (Default: true)").define("rarityBorders", true);
 
+        SHOW_ENCHANTABILITY = builder.comment("Shows enchantability of an item inside Item tooltip (Default: true)").define("showEnchantability", true);
         SHOW_RARITY = builder.comment("Shows rarity of enchantment inside Enchantment screen (Default: true)").define("showRarity", true);
         SHOW_MAX_LEVEL = builder.comment("Shows max level of enchantment inside Enchantment screen (Default: true)").define("showMaxLevel", true);
         SHOW_INCOMPATIBILITIES = builder.comment("Shows incompatibilities of enchantment inside Enchantment screen (Default: true)").define("showIncompatibilities", true);

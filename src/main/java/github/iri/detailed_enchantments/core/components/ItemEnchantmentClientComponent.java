@@ -26,18 +26,20 @@ public class ItemEnchantmentClientComponent implements ClientTooltipComponent{
     public final int iconMargin = 6;
     public final int iconSize;
     public final int paddingTop;
+    public final boolean curse;
 
     public final List<FormattedCharSequence> lines;
-    public ItemEnchantmentClientComponent(MutableComponent text, Enchantment.Rarity rarity, ResourceLocation icon, int iconSize, int paddingTop) {
+    public ItemEnchantmentClientComponent(MutableComponent text, Enchantment.Rarity rarity, ResourceLocation icon, boolean curse, int iconSize, int paddingTop) {
         this.lines = Language.getInstance().getVisualOrder(Minecraft.getInstance().font.getSplitter().splitLines(text, maxChars, text.getStyle()));
         this.iconSize = iconSize;
         this.paddingTop = paddingTop;
         this.icon = icon;
         this.rarity = rarity;
+        this.curse = curse;
     }
 
-    public static ClientTooltipComponent create(MutableComponent text, Enchantment.Rarity rarity, ResourceLocation icon, int paddingTop, int iconSize) {
-        return new ItemEnchantmentClientComponent(text, rarity, icon, iconSize, paddingTop);
+    public static ClientTooltipComponent create(MutableComponent text, Enchantment.Rarity rarity, ResourceLocation icon, boolean curse, int paddingTop, int iconSize) {
+        return new ItemEnchantmentClientComponent(text, rarity, icon, curse, iconSize, paddingTop);
     }
 
     @Override
@@ -62,7 +64,7 @@ public class ItemEnchantmentClientComponent implements ClientTooltipComponent{
     @Override
     public void renderText(Font pFont, int pMouseX, int pMouseY, Matrix4f pMatrix, MultiBufferSource.BufferSource pBufferSource) {
         final int x = pMouseX + iconSize + 4;
-        int y = pMouseY + paddingTop;
+        int y = pMouseY;
         for (final FormattedCharSequence line : lines) {
             float scale = 1;
             Matrix4f scaled = new Matrix4f(pMatrix);
@@ -72,10 +74,20 @@ public class ItemEnchantmentClientComponent implements ClientTooltipComponent{
         }
     }
 
+    public ResourceLocation getIconBorder() {
+        if(curse) {
+            return DetailedEnchantments.loc("textures/gui/tooltips/background_curse.png");
+        } else if (ClientConfig.RARITY_BORDERS.get()) {
+            return DetailedEnchantments.loc("textures/gui/tooltips/background_" + this.rarity.name().toLowerCase() + ".png");
+        }
+
+        return DetailedEnchantments.loc("textures/gui/tooltips/background.png");
+    }
+
     @Override
     public void renderImage(Font pFont, int pX, int pY, GuiGraphics pGuiGraphics) {
         RenderSystem.enableBlend();
-        pGuiGraphics.blit(ClientConfig.RARITY_BORDERS.get() ? DetailedEnchantments.loc("textures/gui/tooltips/background_" + this.rarity.name().toLowerCase() +  ".png") : DetailedEnchantments.loc("textures/gui/tooltips/background.png"), pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
+        pGuiGraphics.blit(getIconBorder(), pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
         pGuiGraphics.blit(DEUtil.getEnchantmentIcon(icon, this.rarity), pX, pY + (paddingTop) - 1, 0, 0, iconSize, iconSize, iconSize, iconSize);
         RenderSystem.disableBlend();
     }

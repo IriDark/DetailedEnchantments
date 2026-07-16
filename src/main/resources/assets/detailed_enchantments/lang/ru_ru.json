@@ -55,5 +55,6 @@
   "detailed_enchantments.illager": "Илладжеров",
   "detailed_enchantments.water": "Водным существам",
   "detailed_enchantments.all": "всех существ",
-  "detailed_enchantments.reduction": "Понижение урона: "
+  "detailed_enchantments.reduction": "Понижение урона: ",
+  "item.detailed_enchantments.enchantment_value": "⭐ Чаруемость: %s"
 }

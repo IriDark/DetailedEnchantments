@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import github.iri.detailed_enchantments.core.config.*;
 import github.iri.detailed_enchantments.core.events.*;
 import net.minecraft.resources.*;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.*;
 import net.minecraftforge.fml.*;
@@ -24,7 +25,12 @@ public class DetailedEnchantments{
         MinecraftForge.EVENT_BUS.register(this);
         IEventBus forgeBus = MinecraftForge.EVENT_BUS;
         ModLoadingContext.get().registerConfig(Type.CLIENT, ClientConfig.SPEC);
+        DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> {
+            forgeBus.addListener(Events::onTooltip);
+            return new Object();
+        });
 
+        forgeBus.register(new Events());
         forgeBus.register(new ClientEvents());
     }
 }
